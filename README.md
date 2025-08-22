@@ -33,7 +33,39 @@ retail-video-analytics/
 
 ## Instalación
 
-### Opción 1: Entorno Local
+### Opción 1: Google Colab (Recomendado)
+
+1. **Abrir el notebook en Colab**:
+   - Subir el archivo `notebooks/01_semana1_prototipo.ipynb` a Google Colab
+   - O usar el enlace directo si está en GitHub: `https://colab.research.google.com/github/tu-usuario/retail-video-analytics/blob/main/notebooks/01_semana1_prototipo.ipynb`
+
+2. **Configurar el entorno**:
+   ```python
+   # Ejecutar en la primera celda del notebook
+   !pip install yolox opencv-python supervision shapely numpy pandas torch torchvision
+   
+   # Clonar el repositorio (si está en GitHub)
+   !git clone https://github.com/tu-usuario/retail-video-analytics.git
+   %cd retail-video-analytics
+   ```
+
+3. **Subir video de prueba**:
+   ```python
+   from google.colab import files
+   uploaded = files.upload()  # Seleccionar tu video
+   ```
+
+4. **Descargar modelo YOLOX**:
+   ```python
+   !wget https://github.com/Megvii-BaseDetection/YOLOX/releases/download/0.1.1rc0/yolox_nano.pth
+   ```
+
+5. **Ejecutar el pipeline**:
+   ```python
+   !python src/tracker_pipeline.py --input tu_video.mp4 --model yolox_nano.pth --output /content/processed/
+   ```
+
+### Opción 2: Entorno Local
 
 1. Clonar el repositorio
 2. Crear un entorno virtual:
@@ -47,16 +79,14 @@ source venv/bin/activate  # En Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### Opción 2: Google Colab
-
-1. Abrir el notebook `notebooks/01_semana1_prototipo.ipynb` en Colab
-2. Ejecutar la primera celda para instalar dependencias:
-```python
-!pip install yolox opencv-python supervision shapely numpy pandas torch torchvision
-```
-
 ## Demo Mínimo
 
+### En Google Colab
+1. Seguir las instrucciones de instalación para Colab
+2. Ejecutar todas las celdas del notebook `01_semana1_prototipo.ipynb`
+3. Los resultados se guardarán en `/content/processed/` y `/content/logs/`
+
+### En Local
 ### 1. Definir ROIs
 ```bash
 python src/roi_editor.py --input data/raw/video_sample.mp4
@@ -65,6 +95,18 @@ python src/roi_editor.py --input data/raw/video_sample.mp4
 ### 2. Ejecutar Pipeline de Análisis
 ```bash
 python src/tracker_pipeline.py --input data/raw/video_sample.mp4 --output data/processed/
+```
+
+## Estructura de Archivos en Colab
+
+Cuando ejecutes en Google Colab, la estructura será:
+```
+/content/
+├─ retail-video-analytics/     # Código del proyecto
+├─ tu_video.mp4               # Video subido
+├─ yolox_nano.pth            # Modelo descargado
+├─ processed/                # Videos procesados
+└─ logs/                     # Eventos CSV
 ```
 
 ## Características Principales
