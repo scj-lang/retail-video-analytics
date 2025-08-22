@@ -5,16 +5,34 @@ import pandas as pd
 import numpy as np
 from pathlib import Path
 from typing import List, Dict, Any
-from ultralytics import YOLO
+import torch
+from yolox.exp import get_exp
+from yolox.utils import postprocess
 import supervision as sv
 from shapely.geometry import Point, Polygon
 
 class RetailTracker:
-    def __init__(self, model_path: str = "yolov8n.pt", roi_config: str = None):
+    def __init__(self, model_path: str = "yolox_nano.pth", exp_file: str = "yolox_nano", roi_config: str = None):
         """Initialize the retail tracking pipeline"""
         
-        # Load YOLO model
-        self.model = YOLO(model_path)
+        # Load YOLOX model
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.exp = get_exp(exp_file, None)
+        self.model = self.exp.get_model()
+        
+        # Load weights
+        if model_path and Path(model_path).exists():
+            ckpt = torch.load(model_path, map_location=self.device)
+            self.model.load_state_dict(ckpt["model"])
+        
+        self.model.to(self.device)
+        self.model.eval()
+        
+        # Model parameters
+        self.test_size = self.exp.test_size
+        self.num_classes = self.exp.num_classes
+        self.confthre = 0.25
+        self.nmsthre = 0.45
         
         # Initialize ByteTrack
         self.tracker = sv.ByteTrack()
@@ -53,6 +71,59 @@ class RetailTracker:
             
         except Exception as e:
             print(f"Error loading ROIs: {e}")
+    
+    def preprocess_frame(self, frame):
+        """Preprocess frame for YOLOX inference"""
+        img = cv2.resize(frame, self.test_size)
+        img = img.astype(np.float32)
+        img /= 255.0
+        img = img[:, :, ::-1]  # BGR to RGB
+        img = np.transpose(img, (2, 0, 1))  # HWC to CHW
+        img = np.expand_dims(img, 0)
+        img = torch.from_numpy(img).to(self.device)
+        return img
+    
+    def detect_persons(self, frame):
+        """Run YOLOX inference and filter for person class"""
+        # Preprocess
+        img = self.preprocess_frame(frame)
+        
+        # Inference
+        with torch.no_grad():
+            outputs = self.model(img)
+            outputs = postprocess(
+                outputs, self.num_classes, self.confthre, self.nmsthre
+            )[0]
+        
+        if outputs is None:
+            return sv.Detections.empty()
+        
+        # Filter for person class (class 0 in COCO)
+        person_mask = outputs[:, 6] == 0  # class 0 = person
+        person_detections = outputs[person_mask]
+        
+        if len(person_detections) == 0:
+            return sv.Detections.empty()
+        
+        # Scale back to original frame size
+        scale_x = frame.shape[1] / self.test_size[0]
+        scale_y = frame.shape[0] / self.test_size[1]
+        
+        person_detections[:, 0] *= scale_x  # x1
+        person_detections[:, 1] *= scale_y  # y1
+        person_detections[:, 2] *= scale_x  # x2
+        person_detections[:, 3] *= scale_y  # y2
+        
+        # Convert to supervision format
+        xyxy = person_detections[:, :4]
+        confidence = person_detections[:, 4] * person_detections[:, 5]  # obj_conf * cls_conf
+        class_id = person_detections[:, 6].astype(int)
+        
+        return sv.Detections(
+            xyxy=xyxy,
+            confidence=confidence,
+            class_id=class_id
+        )
     
     def point_in_roi(self, point: tuple, roi_id: int) -> bool:
         """Check if a point is inside a specific ROI"""
@@ -169,11 +240,8 @@ class RetailTracker:
             
             timestamp = frame_number / fps
             
-            # YOLO detection (filter for person class = 0)
-            results = self.model(frame, classes=[0], verbose=False)
-            
-            # Convert to supervision format
-            detections = sv.Detections.from_ultralytics(results[0])
+            # YOLOX detection (filter for person class = 0)
+            detections = self.detect_persons(frame)
             
             # Update tracker
             detections = self.tracker.update_with_detections(detections)
@@ -228,8 +296,10 @@ def main():
     parser.add_argument('--input', required=True, help='Input video path')
     parser.add_argument('--output', default='data/processed/', 
                        help='Output directory for processed video')
-    parser.add_argument('--model', default='yolov8n.pt', 
-                       help='YOLO model path')
+    parser.add_argument('--model', default='yolox_nano.pth', 
+                       help='YOLOX model path')
+    parser.add_argument('--exp', default='yolox_nano',
+                       help='YOLOX experiment name')
     parser.add_argument('--rois', default='src/config/rois_cartagena.json',
                        help='ROI configuration file')
     
@@ -238,6 +308,7 @@ def main():
     # Initialize tracker
     tracker = RetailTracker(
         model_path=args.model,
+        exp_file=args.exp,
         roi_config=args.rois if Path(args.rois).exists() else None
     )
     

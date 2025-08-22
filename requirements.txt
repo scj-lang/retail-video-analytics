@@ -1,4 +1,4 @@
-ultralytics
+yolox
 opencv-python
 supervision
 shapely

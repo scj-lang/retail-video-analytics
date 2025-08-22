@@ -1,10 +1,10 @@
 # Retail Video Analytics
 
-Sistema de video-analytics para detección de personas, tracking anónimo y análisis de Zonas de Interés (ROIs) en entornos retail.
+Sistema de video-analytics para detección de personas usando YOLOX, tracking anónimo y análisis de Zonas de Interés (ROIs) en entornos retail.
 
 ## Objetivos del Proyecto
 
-- **Detección de Personas**: Utilizar YOLOv8 para detectar personas en video streams
+- **Detección de Personas**: Utilizar YOLOX para detectar personas en video streams
 - **Tracking Anónimo**: Implementar ByteTrack para seguimiento de personas sin identificación
 - **Zonas de Interés (ROIs)**: Definir y monitorear áreas específicas del espacio retail
 - **Análisis de Eventos**: Generar métricas y eventos basados en movimiento en ROIs
@@ -52,7 +52,7 @@ pip install -r requirements.txt
 1. Abrir el notebook `notebooks/01_semana1_prototipo.ipynb` en Colab
 2. Ejecutar la primera celda para instalar dependencias:
 ```python
-!pip install ultralytics opencv-python supervision shapely numpy pandas
+!pip install yolox opencv-python supervision shapely numpy pandas torch torchvision
 ```
 
 ## Demo Mínimo
@@ -69,7 +69,7 @@ python src/tracker_pipeline.py --input data/raw/video_sample.mp4 --output data/p
 
 ## Características Principales
 
-- **YOLOv8n**: Modelo ligero para detección en tiempo real
+- **YOLOX-Nano**: Modelo ligero para detección en tiempo real
 - **ByteTrack**: Tracking robusto sin necesidad de re-identificación
 - **ROIs Dinámicos**: Editor visual para definir zonas poligonales
 - **Métricas Automáticas**: Conteo de personas, tiempo de permanencia, flujo
@@ -77,7 +77,7 @@ python src/tracker_pipeline.py --input data/raw/video_sample.mp4 --output data/p
 ## Próximos Pasos
 
 - [ ] Completar implementación del editor de ROIs
-- [ ] Integrar pipeline completo YOLO + ByteTrack
+- [ ] Integrar pipeline completo YOLOX + ByteTrack
 - [ ] Añadir métricas de análisis temporal
 - [ ] Implementar dashboard de visualización
 

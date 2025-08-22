@@ -45,13 +45,14 @@
 ## Arquitectura Técnica
 
 ```
-YOLOv8 (Detección) → ByteTrack (Tracking) → ROI Analysis → Event Logging
+YOLOX (Detección) → ByteTrack (Tracking) → ROI Analysis → Event Logging
                                               ↓
                                         Video Annotation
 ```
 
 ### Dependencias Principales
-- **ultralytics**: YOLOv8 para detección de objetos
+- **yolox**: YOLOX para detección de objetos
+- **torch**: PyTorch para deep learning
 - **supervision**: Utilidades para computer vision y tracking
 - **shapely**: Operaciones geométricas con polígonos
 - **opencv-python**: Procesamiento de video e interfaz visual
@@ -59,7 +60,7 @@ YOLOv8 (Detección) → ByteTrack (Tracking) → ROI Analysis → Event Logging
 
 ## Decisiones de Diseño
 
-1. **YOLOv8n vs modelos más pesados**: Elegido por balance rendimiento/precisión
+1. **YOLOX-Nano vs modelos más pesados**: Elegido por balance rendimiento/precisión
 2. **ByteTrack**: Tracking sin features visuales, ideal para anonimato
 3. **OpenCV para ROIs**: Interfaz simple y directa para definición manual
 4. **JSON para configuración**: Formato legible y fácil de editar
@@ -68,7 +69,7 @@ YOLOv8 (Detección) → ByteTrack (Tracking) → ROI Analysis → Event Logging
 ## Pruebas Realizadas
 
 ### ✅ Tests Básicos
-- [x] Carga de modelos YOLOv8
+- [x] Configuración de modelos YOLOX
 - [x] Interfaz ROI editor (clicks y visualización)
 - [x] Guardado/carga de configuración JSON
 - [x] Pipeline básico sin errores de dependencias
