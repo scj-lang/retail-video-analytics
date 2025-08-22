@@ -139,6 +139,44 @@ timestamp,frame_number,person_id,event_type,roi_id,roi_name,position_x,position_
 15.2,456,1,roi_exit,0,entrance,180,892
 ```
 
+## Próximos Pasos
+
+- [x] Completar implementación del editor de ROIs
+- [x] Integrar pipeline completo YOLOX + ByteTrack  
+- [x] Configuración para Google Colab
+- [ ] Testing completo con videos reales
+- [ ] Optimización de rendimiento
+- [ ] Métricas de análisis temporal avanzadas
+- [ ] Dashboard de visualización web
+
+## Compatibilidad Google Colab
+
+### ✅ Configuración Colab
+- [x] Instalación automática de dependencias
+- [x] Descarga automática de modelo YOLOX-Nano
+- [x] Widget de upload para videos
+- [x] Pipeline simplificado para entorno Colab
+- [x] Visualizaciones integradas en notebook
+- [x] Descarga de resultados procesados
+
+### Instrucciones Colab
+1. **Setup automático**: Una celda instala todo lo necesario
+2. **Upload fácil**: Widget para subir videos desde computadora
+3. **Procesamiento**: Pipeline optimizado para recursos limitados de Colab
+4. **Resultados**: Video procesado + visualizaciones en el mismo notebook
+5. **Download**: Descarga directa de archivos generados
+
+### Estructura en Colab
+```
+/content/
+├─ yolox_nano.pth           # Modelo descargado automáticamente
+├─ tu_video.mp4            # Video subido por usuario
+├─ pipeline_colab.py       # Pipeline simplificado
+├─ src/config/             # Configuraciones
+├─ processed/              # Videos procesados
+└─ logs/                   # Eventos CSV
+```
+
 ## Conclusiones
 
 El prototipo inicial cumple con los objetivos planteados. La arquitectura modular permite extensiones futuras y el código está listo para testing con datos reales. La implementación prioriza simplicidad y funcionalidad sobre optimizaciones prematuras.
