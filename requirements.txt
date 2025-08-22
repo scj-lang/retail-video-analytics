@@ -1,4 +1,4 @@
-yolox
+git+https://github.com/Megvii-BaseDetection/YOLOX.git
 opencv-python
 supervision
 shapely
